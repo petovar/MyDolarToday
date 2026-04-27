@@ -197,7 +197,16 @@ class RateProvider with ChangeNotifier {
   void setSelectedCurrency(CurrencyOption newValue) {
     if (_selectedCurrency != newValue) {
       _selectedCurrency = newValue;
-      _updateRateFields();
+
+      rateController.text = rateFormat.format(getCurrentRate());
+
+      final double? amount = double.tryParse(
+        usdInputController.text.replaceAll(',', '.'),
+      );
+      if (amount != null && amount > 0) {
+        calculateForward();
+      }
+
       notifyListeners();
     }
   }
@@ -220,14 +229,7 @@ class RateProvider with ChangeNotifier {
   // *** FUNCIÓN CLAVE PARA LA SOLUCIÓN DEL BUG DE FORMATO ***
   // Ahora es pública y se llama desde el onChanged del CurrencyInputField
   void calculateForward() {
-    if (!_usdInputHasfoscus) return;
-    // 1. Intentar obtener el monto de divisas (USD/EUR/USDT)
-    // Reemplazamos coma por punto para que double.tryParse sea robusto.
-    String cleanInput = usdInputController.text.replaceAll(
-      ',',
-      '.',
-    ); // Usar punto como decimal
-    // .replaceAll('.', '') // Quitar separadores de miles
+    String cleanInput = usdInputController.text.replaceAll(',', '.');
 
     final double? amount = double.tryParse(
       cleanInput.isEmpty ? '0.0' : cleanInput,
@@ -236,20 +238,15 @@ class RateProvider with ChangeNotifier {
 
     if (amount != null && currentRate > 0) {
       final double result = amount * currentRate;
-      // 2. Actualizar el campo de Bolívares
       bsResultController.text = _currencyFormat
           .format(result)
-          .replaceAll(
-            _currencyFormat.currencySymbol,
-            '',
-          ); // Quitamos el símbolo para input
+          .replaceAll(_currencyFormat.currencySymbol, '');
     } else {
       bsResultController.text = _currencyFormat
           .format(0.0)
           .replaceAll(_currencyFormat.currencySymbol, '');
     }
 
-    // Notificamos a la UI para que los widgets que escuchan (como el Card de resultado) se actualicen.
     notifyListeners();
   }
 
