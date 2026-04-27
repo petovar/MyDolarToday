@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../models/exchange_rates.dart';
 import '../../providers/rate_provider.dart' show RateProvider;
+import '../../providers/theme_provider.dart' show ThemeProvider;
 import '../widgets/widgets.dart';
 
 class DolarRateScreen extends StatelessWidget {
@@ -53,6 +54,17 @@ class DolarRateScreen extends StatelessWidget {
         title: const Text('TASA DE DIVISAS'),
         centerTitle: true,
         actions: [
+          // Botón de Cambio de Tema
+          IconButton(
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: () {
+              context.read<ThemeProvider>().toggleTheme();
+            },
+          ),
           // Botón de Recarga
           IconButton(
             icon: provider.isLoading
